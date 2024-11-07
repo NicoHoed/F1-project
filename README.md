@@ -5,4 +5,7 @@
 
 
 
-***Nicolas Hoedenaeken***
+***Nicolas Hoedenaeken*** \
+***Liam Gerard*** \
+***Edward Gay*** \
+***Théo Mertens***
