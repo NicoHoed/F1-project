@@ -1,3 +1,6 @@
-//
-// Created by nico on 11/7/24.
-//
+#include <stdio.h>
+
+int main() {
+  printf("Test print");
+  return 0;
+}
