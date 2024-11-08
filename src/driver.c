@@ -32,16 +32,16 @@ void initialize_all_drivers(Driver drivers[]) {
     initialize_driver(&drivers[10], "Pierre Gasly", 10, "Alpine");
     initialize_driver(&drivers[11], "Esteban Ocon", 31, "Alpine");
 
-    initialize_driver(&drivers[10], "Alexander Albon", 23, "Williams");
-    initialize_driver(&drivers[11], "Franco Colapinto", 43, "Williams");
+    initialize_driver(&drivers[12], "Alexander Albon", 23, "Williams");
+    initialize_driver(&drivers[13], "Franco Colapinto", 43, "Williams");
 
-    initialize_driver(&drivers[10], "Liam Lawson", 3, "Racing bulls");
-    initialize_driver(&drivers[11], "Yuki Tsunoda", 22, "Racing bulls");
+    initialize_driver(&drivers[14], "Liam Lawson", 3, "Racing bulls");
+    initialize_driver(&drivers[15], "Yuki Tsunoda", 22, "Racing bulls");
 
-    initialize_driver(&drivers[10], "Zhou Guanyu", 24, "Kick Sauber");
-    initialize_driver(&drivers[11], "Valtteri Bottas", 77, "Kick Sauber");
+    initialize_driver(&drivers[16], "Zhou Guanyu", 24, "Kick Sauber");
+    initialize_driver(&drivers[17], "Valtteri Bottas", 77, "Kick Sauber");
 
-    initialize_driver(&drivers[10], "Kevin Magnussen", 20, "Haas");
-    initialize_driver(&drivers[11], "Nico Hulkenberg", 27, "Haas");
+    initialize_driver(&drivers[18], "Kevin Magnussen", 20, "Haas");
+    initialize_driver(&drivers[19], "Nico Hulkenberg", 27, "Haas");
 
 }

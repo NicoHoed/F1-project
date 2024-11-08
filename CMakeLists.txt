@@ -16,6 +16,7 @@ add_executable(SimulateurF1
         src/race.c
         src/track.c
         src/utils.c
+        include/track.h
 )
 
 # Inclut les headers
