@@ -17,7 +17,7 @@ void simulate_car(int laps, Circuit circuit) {
     int milliseconds = lap_time_ms % 1000;
 
     // Affichage du temps au format souhaité
-    printf("Tour %d : Temps de tour = %d : %02d : %03d\n", i, minutes, seconds, milliseconds);
+    printf("Tour %d : %d:%02d.%03d\n", i, minutes, seconds, milliseconds);
 
     // Pause pour simuler le temps de tour (ici on simule juste un affichage rapide)
     usleep(500000); // Délai de 500 ms pour éviter de ralentir trop l’exécution
