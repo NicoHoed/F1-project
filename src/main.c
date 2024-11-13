@@ -1,51 +1,153 @@
+#include "track.h"
+#include "driver.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
 #include <time.h>
-#include "track.h"
+#include <string.h>
+#include <stdbool.h>
 
-// Fonction qui simule une voiture effectuant des tours et affiche le temps en format `x : xx : xxx`
-void simulate_car(int laps, Circuit circuit) {
-  for (int i = 1; i <= laps; i++) {
-    // Génère un temps de tour aléatoire en fonction du circuit (min_time_ms à max_time_ms)
-    int lap_time_ms = (rand() % (circuit.max_time_ms - circuit.min_time_ms + 1)) + circuit.min_time_ms;
+#define NUM_DRIVERS 20
+#define MAX_LAPS 10
 
-    // Calcul des minutes, secondes et millisecondes
-    int minutes = lap_time_ms / 60000;
-    int seconds = (lap_time_ms % 60000) / 1000;
-    int milliseconds = lap_time_ms % 1000;
+typedef struct {
+    int driver_number;
+    int best_time_ms;
+    int best_s1;
+    int best_s2;
+    int best_s3;
+    bool in_pit;
+    bool is_out;
+} DriverTime;
 
-    // Affichage du temps au format souhaité
-    printf("Tour %d : %d:%02d.%03d\n", i, minutes, seconds, milliseconds);
+// Génère les temps pour chaque secteur en s’assurant que s1 + s2 + s3 = total_time
+void generate_sector_times(int total_time, int *s1, int *s2, int *s3) {
+    int base_time = total_time / 3;
+    *s1 = base_time + (rand() % 100 - 50);
+    *s2 = base_time + (rand() % 100 - 50);
+    *s3 = total_time - *s1 - *s2;
+}
 
-    // Pause pour simuler le temps de tour (ici on simule juste un affichage rapide)
-    usleep(500000); // Délai de 500 ms pour éviter de ralentir trop l’exécution
-  }
+// Simulation d'une session d'essai pour un pilote donné
+void simulate_practice(int driver_index, int laps, Circuit circuit, int pipe_fd[]) {
+    close(pipe_fd[0]); // Ferme le côté lecture du tube pour le processus enfant
+
+    srand(time(NULL) + driver_index * 100);
+
+    DriverTime result = { .driver_number = driver_index, .best_time_ms = circuit.max_time_ms, .in_pit = false, .is_out = false };
+    result.best_s1 = circuit.max_time_ms;
+    result.best_s2 = circuit.max_time_ms;
+    result.best_s3 = circuit.max_time_ms;
+
+    for (int lap = 0; lap < laps; lap++) {
+        // Possibilité de rentrer au stand ou de quitter la séance
+        if (rand() % 10 == 0) {
+            result.in_pit = true;
+            continue;
+        }
+        if (rand() % 20 == 0) {
+            result.is_out = true;
+            break;
+        }
+
+        // Générer un temps de tour et ses secteurs
+        int lap_time_ms = (rand() % (circuit.max_time_ms - circuit.min_time_ms + 1)) + circuit.min_time_ms;
+        int s1, s2, s3;
+        generate_sector_times(lap_time_ms, &s1, &s2, &s3);
+
+        if (lap_time_ms < result.best_time_ms) {
+            result.best_time_ms = lap_time_ms;
+            result.best_s1 = s1;
+            result.best_s2 = s2;
+            result.best_s3 = s3;
+        }
+    }
+
+    write(pipe_fd[1], &result, sizeof(DriverTime));
+    close(pipe_fd[1]);
+    exit(0);
+}
+
+// Comparaison des temps pour le classement
+int compare_times(const void *a, const void *b) {
+    DriverTime *driverA = (DriverTime *)a;
+    DriverTime *driverB = (DriverTime *)b;
+    return driverA->best_time_ms - driverB->best_time_ms;
+}
+
+// Affichage des résultats de la séance d'essais
+void display_results(DriverTime results[], Driver drivers[], int num_drivers) {
+    qsort(results, num_drivers, sizeof(DriverTime), compare_times);
+
+    printf("Classement de la séance d'essais :\n");
+    for (int i = 0; i < num_drivers; i++) {
+        int minutes = results[i].best_time_ms / 60000;
+        int seconds = (results[i].best_time_ms % 60000) / 1000;
+        int milliseconds = results[i].best_time_ms % 1000;
+
+        int diff_ms = i == 0 ? 0 : results[i].best_time_ms - results[i - 1].best_time_ms;
+        int diff_seconds = diff_ms / 1000;
+        int diff_milliseconds = diff_ms % 1000;
+
+        printf("%d. Pilote %d - Temps : %d:%02d:%03d (+%d.%03ds)\n", i + 1, drivers[results[i].driver_number].number,
+               minutes, seconds, milliseconds, diff_seconds, diff_milliseconds);
+    }
+}
+
+// Sauvegarde des résultats dans un fichier
+void save_results_to_file(const char *filename, DriverTime results[], int num_drivers) {
+    FILE *file = fopen(filename, "w");
+    if (file == NULL) {
+        perror("Erreur d'ouverture du fichier");
+        return;
+    }
+
+    fprintf(file, "Classement final de la séance d'essais :\n");
+    for (int i = 0; i < num_drivers; i++) {
+        fprintf(file, "%d. Pilote %d - Temps : %d ms, Secteurs : S1=%d ms, S2=%d ms, S3=%d ms\n",
+                i + 1, results[i].driver_number, results[i].best_time_ms,
+                results[i].best_s1, results[i].best_s2, results[i].best_s3);
+    }
+
+    fclose(file);
 }
 
 int main() {
-  srand(time(NULL));
+    Circuit circuits[24];
+    initialize_all_circuits(circuits);
+    Circuit current_circuit = circuits[0];
 
-  Circuit circuits[24];
-  initialize_all_circuits(circuits);  // Initialiser tous les circuits
+    Driver drivers[NUM_DRIVERS];
+    initialize_all_drivers(drivers);
 
-  pid_t pid = fork();  // Création d’un processus enfant
+    int pipes[NUM_DRIVERS][2];
+    DriverTime results[NUM_DRIVERS];
 
-  if (pid < 0) {
-    perror("Erreur lors de la création du processus enfant");
-    exit(1);
-  } else if (pid == 0) {
-    // Code du processus enfant (simulation de la voiture)
-    printf("Processus voiture démarré (PID : %d)\n", getpid());
-    simulate_car(circuits[0].laps, circuits[0]);  // Par exemple, simulateur de 5 tours pour le premier circuit
-    printf("Processus voiture terminé.\n");
-    exit(0); // Fin du processus enfant
-  } else {
-    printf("Processus principal attend la fin de la voiture...\n");
-    wait(NULL);  // Attendre que le processus enfant se termine
-    printf("Course terminée.\n");
-  }
+    for (int i = 0; i < NUM_DRIVERS; i++) {
+        if (pipe(pipes[i]) == -1) {
+            perror("Erreur de création de pipe");
+            exit(EXIT_FAILURE);
+        }
 
-  return 0;
+        pid_t pid = fork();
+        if (pid == -1) {
+            perror("Erreur de fork");
+            exit(EXIT_FAILURE);
+        } else if (pid == 0) {
+            simulate_practice(i, MAX_LAPS, current_circuit, pipes[i]);
+        }
+    }
+
+    for (int i = 0; i < NUM_DRIVERS; i++) {
+        close(pipes[i][1]);
+        read(pipes[i][0], &results[i], sizeof(DriverTime));
+        close(pipes[i][0]);
+        wait(NULL);
+    }
+
+    display_results(results, drivers, NUM_DRIVERS);
+    save_results_to_file("practice_results.txt", results, NUM_DRIVERS);
+
+    return 0;
 }
