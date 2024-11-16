@@ -76,24 +76,56 @@ int compare_times(const void *a, const void *b) {
     return driverA->best_time_ms - driverB->best_time_ms;
 }
 
-// Affichage des résultats de la séance d'essais
-void display_results(DriverTime results[], Driver drivers[], int num_drivers) {
+void display_results_ascii_table(DriverTime results[], Driver drivers[], int num_drivers) {
+    // Trier les résultats par meilleur temps
     qsort(results, num_drivers, sizeof(DriverTime), compare_times);
 
-    printf("Classement de la séance d'essais :\n");
+    // Largeur de chaque colonne
+    const int col1_width = 5;  // Position
+    const int col2_width = 20; // NAME
+    const int col3_width = 15; // TIME
+
+    // Largeur totale du tableau
+    const int total_width = col1_width + col2_width + col3_width + 6; // +6 pour les séparateurs
+
+    // Ligne supérieure
+    printf(" ▛");
+    for (int i = 0; i < total_width - 4; i++) printf("▀");
+    printf("▜\n");
+
+    // En-têtes
+    printf(" ▌%-*s│%-*s│%-*s▐\n", col1_width, "POS", col2_width, "NAME", col3_width, "TIME");
+
+    // Ligne de séparation
+    printf(" ▌");
+    for (int i = 0; i < col1_width; i++) printf("─");
+    printf("┼");
+    for (int i = 0; i < col2_width; i++) printf("─");
+    printf("┼");
+    for (int i = 0; i < col3_width; i++) printf("─");
+    printf("▐\n");
+
+    // Corps du tableau
     for (int i = 0; i < num_drivers; i++) {
         int minutes = results[i].best_time_ms / 60000;
         int seconds = (results[i].best_time_ms % 60000) / 1000;
         int milliseconds = results[i].best_time_ms % 1000;
 
-        int diff_ms = i == 0 ? 0 : results[i].best_time_ms - results[i - 1].best_time_ms;
-        int diff_seconds = diff_ms / 1000;
-        int diff_milliseconds = diff_ms % 1000;
+        char time_str[20];
+        snprintf(time_str, sizeof(time_str), "%d:%02d:%03d", minutes, seconds, milliseconds);
 
-        printf("%d. Pilote %d - Temps : %d:%02d:%03d (+%d.%03ds)\n", i + 1, drivers[results[i].driver_number].number,
-               minutes, seconds, milliseconds, diff_seconds, diff_milliseconds);
+        printf(" ▌%-*d│%-*s│%-*s▐\n",
+               col1_width, i + 1, // Classement
+               col2_width, drivers[results[i].driver_number].name,
+               col3_width, time_str);
     }
+
+    // Ligne inférieure
+    printf(" ▙");
+    for (int i = 0; i < total_width - 4; i++) printf("▄");
+    printf("▟\n");
 }
+
 
 // Sauvegarde des résultats dans un fichier
 void save_results_to_file(const char *filename, DriverTime results[], int num_drivers) {
@@ -146,7 +178,7 @@ int main() {
         wait(NULL);
     }
 
-    display_results(results, drivers, NUM_DRIVERS);
+    display_results_ascii_table(results, drivers, NUM_DRIVERS);
     save_results_to_file("practice_results.txt", results, NUM_DRIVERS);
 
     return 0;
