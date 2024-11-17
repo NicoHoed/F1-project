@@ -31,3 +31,7 @@ add_executable(F1Simulation ${SOURCES})
 if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(F1Simulation PRIVATE -Wall -Wextra -pedantic)
 endif()
+
+# Copier les fichiers nécessaires
+file(COPY ${CMAKE_SOURCE_DIR}/data/drivers.csv ${CMAKE_SOURCE_DIR}/data/tracks.csv
+        DESTINATION ${CMAKE_BINARY_DIR}/data)

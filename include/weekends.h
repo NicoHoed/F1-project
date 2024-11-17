@@ -4,6 +4,6 @@
 #include "drivers.h"
 #include "tracks.h"
 
-void simulate_weekend(Driver drivers[], int num_drivers, Circuit circuit);
+void simulate_weekend(Driver drivers[], int num_drivers, Track track);
 
 #endif

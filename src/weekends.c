@@ -2,8 +2,8 @@
 #include "practices.h"
 #include <stdio.h>
 
-void simulate_weekend(Driver drivers[], int num_drivers, Circuit circuit) {
-    printf("=== Weekend à %s ===\n", circuit.name);
-    simulate_practice(drivers, num_drivers, circuit);
+void simulate_weekend(Driver drivers[], int num_drivers, Track track) {
+    printf("=== Weekend à %s ===\n", track.name);
+    simulate_practice(drivers, num_drivers, track);
     // Ajouter les qualifications et la course
 }

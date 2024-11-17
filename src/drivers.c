@@ -1,24 +1,29 @@
-#include "drivers.h"
 #include <stdio.h>
 #include <string.h>
-#include <stdbool.h>
+#include "drivers.h"
 
-int load_drivers(const char *filename, Driver drivers[], int max_drivers) {
+int load_drivers(const char *filename, Driver *drivers, int max_drivers) {
     FILE *file = fopen(filename, "r");
     if (!file) {
-        perror("Erreur d'ouverture du fichier");
-        return 0; // Retourne 0 pour indiquer qu'aucun pilote n'a été chargé
+        perror("Erreur d'ouverture du fichier CSV");
+        return 0;
     }
 
+    int driver_count = 0;
 
+    char header[100];
+    fgets(header, sizeof(header), file);
 
-
-    int count = 0;
-    while (count < max_drivers && fscanf(file, "%d,%49[^,],%49[^\n]\n",
-            &drivers[count].number, drivers[count].name, drivers[count].team) == 3) {
-        count++;
-            }
+    while (fscanf(file, "%d,%d,%49[^,],%49[^,],%29[^\n]",
+                  &drivers[driver_count].id,
+                  &drivers[driver_count].number,
+                  drivers[driver_count].name,
+                  drivers[driver_count].team,
+                  drivers[driver_count].nationality) == 5) {
+        driver_count++;
+        if (driver_count >= max_drivers) break;
+                  }
 
     fclose(file);
-    return count;
+    return driver_count;
 }

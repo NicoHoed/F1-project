@@ -1,22 +1,29 @@
-#include "tracks.h"
 #include <stdio.h>
-#include <stdbool.h>
+#include "tracks.h"
 
-int load_circuits(const char *filename, Circuit circuits[], int max_circuits) {
+int load_tracks(const char *filename, Track *tracks, int max_tracks) {
     FILE *file = fopen(filename, "r");
     if (!file) {
-        perror("Erreur d'ouverture du fichier");
-        return 0; // Retourne 0 pour indiquer qu'aucun pilote n'a été chargé
+        perror("Erreur d'ouverture du fichier CSV");
+        return 0;
     }
 
+    int track_count = 0;
 
+    // Lire et ignorer l'en-tête
+    char header[100];
+    if (fgets(header, sizeof(header), file) == NULL) {
+        fclose(file);
+        return 0;
+    }
 
-    int count = 0;
-    while (count < max_circuits && fscanf(file, "%49[^,],%d,%d\n",
-            circuits[count].name, &circuits[count].min_time_ms, &circuits[count].max_time_ms) == 3) {
-        count++;
-            }
+    // Lire chaque ligne de données
+    while (fscanf(file, "%d,%49[^,],%d,%d\n", &tracks[track_count].id, tracks[track_count].name,
+                  &tracks[track_count].min_time_ms, &tracks[track_count].max_time_ms) == 4) {
+        track_count++;
+        if (track_count >= max_tracks) break;
+                  }
 
     fclose(file);
-    return count;
+    return track_count;
 }
