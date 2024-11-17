@@ -1,0 +1,5 @@
+44,Lewis Hamilton,Mercedes
+33,Max Verstappen,Red Bull
+16,Charles Leclerc,Ferrari
+11,Sergio Perez,Red Bull
+4,Lando Norris,McLaren

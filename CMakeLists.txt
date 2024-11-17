@@ -1,23 +1,33 @@
-# Spécifie la version minimale de CMake requise
+# Minimum version of CMake required
 cmake_minimum_required(VERSION 3.10)
 
-# Nom du projet
-project(F1-project C)
+# Project name
+project(F1Simulation)
 
-# Définit le standard de C
+# Specify the C standard (optional but recommended)
 set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED True)
 
-# Ajoute les fichiers sources
-add_executable(SimulateurF1
+# Include directories
+include_directories(include)
+
+# Specify source files
+set(SOURCES
+        src/drivers.c
         src/main.c
-        src/driver.c
-        src/championship.c
-        src/weekend.c
-        src/race.c
-        src/track.c
+        src/practices.c
+        src/quali.c
+        src/races.c
+        src/season.c
+        src/tracks.c
         src/utils.c
-        include/track.h
+        src/weekends.c
 )
 
-# Inclut les headers
-include_directories(include)
+# Specify the executable to be created
+add_executable(F1Simulation ${SOURCES})
+
+# Optionally, enable warnings during compilation
+if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(F1Simulation PRIVATE -Wall -Wextra -pedantic)
+endif()
