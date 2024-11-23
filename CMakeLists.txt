@@ -1,37 +1,10 @@
-# Minimum version of CMake required
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.29)
+project(f1_test C)
 
-# Project name
-project(F1Simulation)
+set(CMAKE_C_STANDARD 11)
 
-# Specify the C standard (optional but recommended)
-set(CMAKE_C_STANDARD 99)
-set(CMAKE_C_STANDARD_REQUIRED True)
-
-# Include directories
-include_directories(include)
-
-# Specify source files
-set(SOURCES
-        src/drivers.c
-        src/main.c
-        src/practices.c
-        src/quali.c
-        src/races.c
-        src/season.c
-        src/tracks.c
-        src/utils.c
-        src/weekends.c
-)
-
-# Specify the executable to be created
-add_executable(F1Simulation ${SOURCES})
-
-# Optionally, enable warnings during compilation
-if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
-    target_compile_options(F1Simulation PRIVATE -Wall -Wextra -pedantic)
-endif()
-
-# Copier les fichiers nécessaires
-file(COPY ${CMAKE_SOURCE_DIR}/data/drivers.csv ${CMAKE_SOURCE_DIR}/data/tracks.csv
-        DESTINATION ${CMAKE_BINARY_DIR}/data)
+add_executable(f1_test main.c
+        f1_championship.h
+        time.c
+        f1_championship.c
+        car.h)
