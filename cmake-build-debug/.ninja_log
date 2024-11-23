@@ -1,0 +1,9 @@
+# ninja log v6
+0	36	1732381389707838012	CMakeFiles/f1_test.dir/main.c.o	2ff0abc3eadfc65
+1	53	1732381222866995027	CMakeFiles/f1_test.dir/time.c.o	40e692f76e468774
+2	41	1732381389709838094	CMakeFiles/f1_test.dir/f1_championship.c.o	b75b26950d19790a
+41	67	1732381389748839694	f1_test	79e95f2ecf4f4934
+1	30	1732381767925350620	CMakeFiles/f1_test.dir/time.c.o	cc90e1aaea8ac7dd
+0	31	1732381767924350579	CMakeFiles/f1_test.dir/main.c.o	227b7ce038373a91
+1	43	1732381767925350620	CMakeFiles/f1_test.dir/f1_championship.c.o	b603caf5bdd58b87
+43	55	1732381767967352343	f1_test	79e95f2ecf4f4934
