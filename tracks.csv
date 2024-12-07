@@ -1,0 +1,25 @@
+id,name,min_time_ms,max_time_ms
+1,Bahrain,91000,110000
+2,Saudi Arabia,88000,106000
+3,Australia,78000,119000
+4,Japan,87000,118000
+5,China,85000,115000
+6,Miami,88595,92099
+7,Emilia-Romagna,76990,81059
+8,Monaco,72169,75574
+9,Canada,84435,100530
+10,Spain,74228,75916
+11,Austria,65685,67259
+12,Great-Britain,87420,89864
+13,Hungary,78713,80371
+14,Belgium,103372,105995
+15,Netherlands,72322,82036
+16,Italy,81676,83995
+17,Azerbaidjan,105546,109052
+18,Singapore,91763,93797
+19,USA,93602,97219
+20,Mexico,77998,81256
+21,Brazil,70610,72883
+22,Las Vegas,,
+23,Quatar,,
+24,Abu Dhabi,,
