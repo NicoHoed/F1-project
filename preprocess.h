@@ -1,9 +1,3 @@
-/*
-Role : fichier contenant les directives pré-processeurs du programme
-
-Créateurs : YiddishGun & M-Momin le 27/07/22
-*/
-
 #ifndef preprocess_h
 #define preprocess_h
 

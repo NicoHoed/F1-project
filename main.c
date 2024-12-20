@@ -1,9 +1,18 @@
 #include "f1_championship.h"
+#include <unistd.h> // Pour sleep()
 
 #define NUM_PRACTICE_LAPS 5
 #define NUM_QUALIFICATION_LAPS 5
 #define NUM_RACE_LAPS 10
-#define SLEEP_TIME 10000
+#define TOUR_SLEEP_TIME 1 // Temps d'attente en secondes
+
+
+void wait_for_next_session() {
+    printf("\nSession terminée.\n");
+    printf("Appuyez sur Entrée pour continuer à la prochaine session...\n");
+    getchar(); // Attend que l'utilisateur appuie sur Entrée
+}
+
 
 // Function to clear the terminal screen
 void clear_screen() {
@@ -32,12 +41,14 @@ int main() {
             clear_screen();
             printf("Practice Session P%d...\n", session);
             print_current_standings(shm);
-            usleep(SLEEP_TIME); 
+            sleep(TOUR_SLEEP_TIME);
         }
         char filename[20];
         sprintf(filename, "P%d_results.txt", session);
         save_session_results(shm, filename);
+        wait_for_next_session(); // Ajout de la pause
     }
+
 
     // Simulate qualification sessions (Q1, Q2, Q3)
     for (int session = 1; session <= 3; session++) {
@@ -49,11 +60,12 @@ int main() {
             clear_screen();
             printf("Qualification Session Q%d...\n", session);
             print_current_standings(shm);
-            usleep(SLEEP_TIME);
+            sleep(TOUR_SLEEP_TIME);
         }
         char filename[20];
         sprintf(filename, "Q%d_results.txt", session);
         save_session_results(shm, filename);
+        wait_for_next_session(); // Ajout de la pause
 
         // Remove cars that did not qualify for the next session
         if (session < 3) {
@@ -75,9 +87,10 @@ int main() {
         clear_screen();
         printf("Racing\n");
         print_current_standings(shm);
-        usleep(SLEEP_TIME); // Sleep for 0.1 seconds
+        sleep(TOUR_SLEEP_TIME);
     }
     save_session_results(shm, "Race_results.txt");
+    wait_for_next_session(); // Ajout de la pause
 
         // Allocate points based on the race results
     allocate_points(shm, 2); 
