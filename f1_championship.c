@@ -118,16 +118,18 @@ void simulate_lap(struct SharedMemory *shm, int car_index, int sem_id) {
     shm->best_race_lap_car = car->car_number;
   }
 
-  // Randomly decide if the car goes to the pit or is out
+  // Randomly decide if the car goes to the pit
   if (rand() % 100 < 5) {
     car->pit_stop = 1;
   }
-  if (rand() % 100 < 2) {
-    car->out = 1;
-  }
+  // Remove the following line for practices
+  // if (rand() % 100 < 2) {
+  //     car->out = 1;
+  // }
 
   sem_unlock(sem_id);
 }
+
 
 void save_session_results(struct SharedMemory *shm, const char *filename) {
   FILE *file = fopen(filename, "w");

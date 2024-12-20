@@ -46,7 +46,7 @@ int main() {
         char filename[20];
         sprintf(filename, "P%d_results.txt", session);
         save_session_results(shm, filename);
-        wait_for_next_session(); // Ajout de la pause
+        wait_for_next_session();
     }
 
 
@@ -65,7 +65,7 @@ int main() {
         char filename[20];
         sprintf(filename, "Q%d_results.txt", session);
         save_session_results(shm, filename);
-        wait_for_next_session(); // Ajout de la pause
+        wait_for_next_session();
 
         // Remove cars that did not qualify for the next session
         if (session < 3) {
@@ -90,7 +90,7 @@ int main() {
         sleep(TOUR_SLEEP_TIME);
     }
     save_session_results(shm, "Race_results.txt");
-    wait_for_next_session(); // Ajout de la pause
+    wait_for_next_session();
 
         // Allocate points based on the race results
     allocate_points(shm, 2); 
