@@ -79,6 +79,18 @@ int main() {
     }
 
     // Simulate the race
+
+    printf("Starting the race...\n");
+
+    // Reset all cars to active status for the race
+    printf("Resetting all cars to active status for the race...\n");
+    sem_lock(sem_id);
+    for (int i = 0; i < NUM_CARS; i++) {
+        shm->cars[i].out = 0; // Reset the 'out' status
+    }
+    sem_unlock(sem_id);
+
+    // Race simulation loop
     printf("Starting the Race...\n");
     for (int lap = 0; lap < NUM_RACE_LAPS; lap++) { 
         for (int i = 0; i < NUM_CARS; i++) {

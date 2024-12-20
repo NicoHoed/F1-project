@@ -5,14 +5,24 @@ void sort_cars_by_lap_time(struct SharedMemory *shm) {
   struct CarTime temp;
   for (int i = 0; i < NUM_CARS - 1; i++) {
     for (int j = i + 1; j < NUM_CARS; j++) {
-      if (shm->cars[j].best_lap_time < shm->cars[i].best_lap_time) {
+      // Priorité : les voitures actives restent en haut
+      if (shm->cars[i].out > shm->cars[j].out) {
         temp = shm->cars[i];
         shm->cars[i] = shm->cars[j];
         shm->cars[j] = temp;
       }
+      // Si les deux voitures sont actives, trier par temps croissant
+      else if (shm->cars[i].out == shm->cars[j].out &&
+               shm->cars[j].best_lap_time < shm->cars[i].best_lap_time) {
+        temp = shm->cars[i];
+        shm->cars[i] = shm->cars[j];
+        shm->cars[j] = temp;
+               }
     }
   }
 }
+
+
 
 void initialize_shared_memory(struct SharedMemory *shm) {
   int car_numbers[NUM_CARS] = {1,  11, 16, 55, 63, 44, 31, 10, 4,  81,
@@ -171,26 +181,13 @@ void print_current_standings(struct SharedMemory *shm) {
          "|    Diff   |\n");
   printf("-----------------------------------------------------------------\n");
 
-  int positions[NUM_CARS];
-  for (int i = 0; i < NUM_CARS; i++) {
-    positions[i] = i;
-  }
-
-  // Sort the cars by best lap time (ascending order)
-  for (int i = 0; i < NUM_CARS - 1; i++) {
-    for (int j = i + 1; j < NUM_CARS; j++) {
-      if (shm->cars[positions[j]].best_lap_time <
-          shm->cars[positions[i]].best_lap_time) {
-        int temp = positions[i];
-        positions[i] = positions[j];
-        positions[j] = temp;
-      }
-    }
-  }
+  // Trier les voitures par temps et statut
+  sort_cars_by_lap_time(shm);
 
   float previous_best_time = 0.0f;
   for (int i = 0; i < NUM_CARS; i++) {
-    struct CarTime *car = &shm->cars[positions[i]];
+    struct CarTime *car = &shm->cars[i];
+
     if (car->out && i == 0) {
       previous_best_time = car->best_lap_time;
     }
@@ -203,12 +200,12 @@ void print_current_standings(struct SharedMemory *shm) {
     if (i > 0 && !car->out) {
       printf(" +%.2f sec", car->best_lap_time - previous_best_time);
     } else {
-      printf("          "); // Empty space for the first car or if car is out
+      printf("          "); // Espace vide pour la première voiture ou celles qui sont OUT
     }
 
     printf(" |\n");
 
-    // Update previous best time
+    // Met à jour le temps de référence pour la différence
     if (!car->out) {
       previous_best_time = car->best_lap_time;
     }
@@ -216,6 +213,7 @@ void print_current_standings(struct SharedMemory *shm) {
 
   printf("-----------------------------------------------------------------\n");
 }
+
 
 #include "f1_championship.h"
 
