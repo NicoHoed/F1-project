@@ -23,7 +23,6 @@ void sort_cars_by_lap_time(struct SharedMemory *shm) {
 }
 
 
-
 void initialize_shared_memory(struct SharedMemory *shm) {
   int car_numbers[NUM_CARS] = {1,  11, 16, 55, 63, 44, 31, 10, 4,  81,
                                77, 24, 14, 18, 20, 27, 22, 3,  23, 2};
@@ -140,6 +139,30 @@ void simulate_lap(struct SharedMemory *shm, int car_index, int sem_id) {
   sem_unlock(sem_id);
 }
 
+// Define a structure to map car numbers to driver names
+struct CarDriver {
+  int car_number;
+  const char *driver_name;
+};
+
+// Initialize the mapping of car numbers to driver names
+const struct CarDriver car_driver_mapping[] = {
+  {1, "Verstappen"}, {4, "Norris"},     {10, "Gasly"},       {11, "Perez"},
+  {14, "Alonso"},     {16, "Leclerc"},  {18, "Stroll"},      {20, "Magnussen"},
+  {22, "Tsunoda"},    {23, "Albon"},    {24, "Zhou"},        {27, "Hulkenberg"},
+  {3, "Ricciardo"},     {31, "Ocon"},     {2, "Sargeant"},   {44, "Hamilton"},
+  {55, "Sainz"},      {63, "Russell"},  {77, "Bottas"},      {81, "Piastri"}
+};
+
+// Find driver name by car number
+const char *find_driver_name(int car_number) {
+  for (int i = 0; i < sizeof(car_driver_mapping) / sizeof(car_driver_mapping[0]); i++) {
+    if (car_driver_mapping[i].car_number == car_number) {
+      return car_driver_mapping[i].driver_name;
+    }
+  }
+  return "Unknown"; // Fallback for unmapped car numbers
+}
 
 void save_session_results(struct SharedMemory *shm, const char *filename) {
   FILE *file = fopen(filename, "w");
@@ -148,9 +171,9 @@ void save_session_results(struct SharedMemory *shm, const char *filename) {
     return;
   }
 
-  fprintf(file, "Car\tBest Lap Time\tSector 1\tSector 2\tSector 3\n");
+  fprintf(file, "Car\tDriver\t\tBest Lap Time\tSector 1\tSector 2\tSector 3\n");
   for (int i = 0; i < NUM_CARS; i++) {
-    fprintf(file, "%d\t%.2f\t%.2f\t%.2f\t%.2f\n", shm->cars[i].car_number,
+    fprintf(file, "%d\t%-12s\t%.2f\t\t%.2f\t\t%.2f\t\t%.2f\n", shm->cars[i].car_number, find_driver_name(shm->cars[i].car_number),
             shm->cars[i].best_lap_time, shm->cars[i].sector_times[0],
             shm->cars[i].sector_times[1], shm->cars[i].sector_times[2]);
   }
@@ -168,18 +191,17 @@ void save_session_results(struct SharedMemory *shm, const char *filename) {
   }
 
   if (best_car_index != -1) {
-    fprintf(file, "\nBest Lap Time: %.2f by Car %d\n", best_lap,
-            shm->cars[best_car_index].car_number);
+    fprintf(file, "\nBest Lap Time: %.2f by Car %d (%s)\n", best_lap,
+            shm->cars[best_car_index].car_number, find_driver_name(shm->cars[best_car_index].car_number));
   }
 
   fclose(file);
 }
 
 void print_current_standings(struct SharedMemory *shm) {
-  printf("-----------------------------------------------------------------\n");
-  printf("| Pos | Car # | Best Lap  T  |  S.1    S.2    S.3  | Pit | Status "
-         "|    Diff   |\n");
-  printf("-----------------------------------------------------------------\n");
+  printf("----------------------------------------------------------------------------------------------\n");
+  printf("| Pos | Car # | Driver       | Best Lap  T  |  S.1    S.2    S.3  | Pit | Status |    Diff   |\n");
+  printf("----------------------------------------------------------------------------------------------\n");
 
   // Trier les voitures par temps et statut
   sort_cars_by_lap_time(shm);
@@ -192,8 +214,8 @@ void print_current_standings(struct SharedMemory *shm) {
       previous_best_time = car->best_lap_time;
     }
 
-    printf("| %3d | %5d |   %.2f sec  | %.2f, %.2f, %.2f | %3s | %6s |", i + 1,
-           car->car_number, car->best_lap_time, car->sector_times[0],
+    printf("| %3d | %5d | %-12s | %8.2f sec | %.2f, %.2f, %.2f | %3s |   %6s  |", i + 1,
+           car->car_number, find_driver_name(car->car_number), car->best_lap_time, car->sector_times[0],
            car->sector_times[1], car->sector_times[2],
            car->pit_stop ? "P" : " ", car->out ? RED"OUT"RESET : GREEN"RUN"RESET);
 
@@ -211,7 +233,7 @@ void print_current_standings(struct SharedMemory *shm) {
     }
   }
 
-  printf("-----------------------------------------------------------------\n");
+  printf("-----------------------------------------------------------------------------------------------\n");
 }
 
 
@@ -224,7 +246,7 @@ void print_championship_standings(struct SharedMemory *shm) {
   printf("| Pos | Car # | Total Points |  Best Lap     |\n");
   printf("===============================================\n");
 
-  // Sort cars by their total points (descending order)
+  // Sort the cars by their total points (descending order)
   int positions[NUM_CARS];
   for (int i = 0; i < NUM_CARS; i++) {
     positions[i] = i;
