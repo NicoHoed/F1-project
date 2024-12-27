@@ -20,6 +20,6 @@ id,name,min_time_ms,max_time_ms
 19,USA,93602,97219
 20,Mexico,77998,81256
 21,Brazil,70610,72883
-22,Las Vegas,,
-23,Quatar,,
-24,Abu Dhabi,,
+22,Las Vegas,95000,98730
+23,Quatar,81953,84280
+24,Abu Dhabi,86321,86519
