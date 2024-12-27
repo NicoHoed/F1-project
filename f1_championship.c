@@ -240,11 +240,11 @@ void print_current_standings(struct SharedMemory *shm) {
 #include "f1_championship.h"
 
 void print_championship_standings(struct SharedMemory *shm) {
-  printf("===============================================\n");
-  printf("|           CHAMPIONSHIP STANDINGS            |\n");
-  printf("===============================================\n");
-  printf("| Pos | Car # | Total Points |  Best Lap     |\n");
-  printf("===============================================\n");
+  printf("==============================================================\n");
+  printf("|                   CHAMPIONSHIP STANDINGS                   |\n");
+  printf("==============================================================\n");
+  printf("| Pos | Car # |    Driver    | Total Points |    Best Lap    |\n");
+  printf("==============================================================\n");
 
   // Sort the cars by their total points (descending order)
   int positions[NUM_CARS];
@@ -276,11 +276,11 @@ void print_championship_standings(struct SharedMemory *shm) {
       color = "\033[1;34m"; // Blue for 3rd place
     }
 
-    printf("|%s %3d%s | %5d |     %-10d |    %-10f|\n", color, i + 1,
-           reset_color, car->car_number, car->points, car->best_lap_time);
+    printf("|%s %3d%s | %5d | %-12s |   %-10d |  %8.2f sec  |\n", color, i + 1,
+           reset_color, car->car_number, find_driver_name(car->car_number), car->points, car->best_lap_time);
 
-    printf("-----------------------------------------------\n");
+    printf("--------------------------------------------------------------\n");
   }
 
-  printf("===============================================\n");
+  printf("==============================================================\n");
 }
