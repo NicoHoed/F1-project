@@ -1,9 +1,3 @@
-/*
-Role : fichier contenant les déclarations de fonctions liées au temps
-
-Créateurs : YiddishGun & M-Momin le 27/07/22
-*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>

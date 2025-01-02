@@ -1,10 +1,3 @@
-/*
-Role : fichier contenant les prototypes des fonctions liées au générations de temps
-
-Créateurs : YiddishGun & M-Momin le 27/07/22
-*/
-
-
 #ifndef time_h
 #define time_h
 
@@ -22,6 +15,5 @@ struct SectorTime { //definition de la struct
 //prototypes de fonctions
 int genererTemps(); //fonction pour generer un temps aleatoire
 void assignerTemps(SectorTime* temps); // fonction pour assigner et convertir les temps
-
 
 #endif // !time_h
