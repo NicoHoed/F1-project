@@ -1,12 +1,12 @@
 #include "f1_championship.h"
 
-// Sort the cars by their best lap time
+// trie les voitures par leur meilleur temps au tour
 void sort_cars_by_lap_time(struct SharedMemory *shm) {
   struct CarTime temp;
-  for (int i = 0; i < NUM_CARS - 1; i++) {
+  for (int i = 0; i < NUM_CARS - 1; i++) { // parcourt les voitures pour comparer leurs positions
     for (int j = i + 1; j < NUM_CARS; j++) {
       // Priorité : les voitures actives restent en haut
-      if (shm->cars[i].out > shm->cars[j].out) {
+      if (shm->cars[i].out > shm->cars[j].out) { // si une voiture est out, elle sera place en fin de la liste
         temp = shm->cars[i];
         shm->cars[i] = shm->cars[j];
         shm->cars[j] = temp;
@@ -22,14 +22,14 @@ void sort_cars_by_lap_time(struct SharedMemory *shm) {
   }
 }
 
-
+// initialiser la memoire partagée avec des valeurs de vase pour chaque pilote
 void initialize_shared_memory(struct SharedMemory *shm) {
   int car_numbers[NUM_CARS] = {1,  11, 16, 55, 63, 44, 31, 10, 4,  81,
-                               77, 24, 14, 18, 20, 27, 22, 3,  23, 2};
-  for (int i = 0; i < NUM_CARS; i++) {
+                               77, 24, 14, 18, 20, 27, 22, 3,  23, 2}; // trableau des num de voitures
+  for (int i = 0; i < NUM_CARS; i++) { //initialise chaque auto
     shm->cars[i].car_number = car_numbers[i];
-    shm->cars[i].best_lap_time = MAX_LAP_TIME;
-    shm->cars[i].pit_stop = 0;
+    shm->cars[i].best_lap_time = MAX_LAP_TIME; // initialise le temps de tour a la valeur max
+    shm->cars[i].pit_stop = 0; // aucun arret au stand
     shm->cars[i].out = 0;
     shm->cars[i].points = 0;
     for (int j = 0; j < NUM_SECTORS; j++) {
@@ -42,25 +42,25 @@ void initialize_shared_memory(struct SharedMemory *shm) {
   shm->best_race_lap_time = MAX_LAP_TIME;
   shm->best_race_lap_car = -1;
 }
-
+// attribuer les points base sur le classement
 void allocate_points(struct SharedMemory *shm, int race_type) {
   // Points distribution
   int sprint_points[8] = {8, 7, 6, 5, 4, 3, 2, 1};
   int race_points[10] = {25, 20, 15, 10, 8, 6, 5, 3, 2, 1};
 
-  // Sort cars by best lap time to determine finishing order
+  // trier par les meilleurs temps
   sort_cars_by_lap_time(shm);
 
-  // Allocate points based on the race type
-  if (race_type == 1) { // Sprint race
+  // Attribuer des points en fonction du type de course
+  if (race_type == 1) { // course Sprint
     for (int i = 0; i < 8; i++) {
       shm->cars[i].points += sprint_points[i];
     }
   } else if (race_type == 2) { // Sunday race
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) { // attribue les points au premier
       shm->cars[i].points += race_points[i];
     }
-    // Award an additional point for the fastest lap if within the top 10
+    // Accordez un point supplémentaire pour le tour le plus rapide s'il est dans le top 10
     if (shm->best_race_lap_car != -1) {
       for (int i = 0; i < 10; i++) {
         if (shm->cars[i].car_number == shm->best_race_lap_car) {
@@ -71,7 +71,7 @@ void allocate_points(struct SharedMemory *shm, int race_type) {
     }
   }
 }
-
+// utiliser les semaphores pour verrouiller des sections critiques
 void sem_lock(int sem_id) {
   struct sembuf sem_op;
   sem_op.sem_num = 0;
@@ -79,7 +79,7 @@ void sem_lock(int sem_id) {
   sem_op.sem_flg = 0;
   semop(sem_id, &sem_op, 1);
 }
-
+// utiliser les semaphores pour deverouiller des sections critiques
 void sem_unlock(int sem_id) {
   struct sembuf sem_op;
   sem_op.sem_num = 0;
@@ -87,17 +87,17 @@ void sem_unlock(int sem_id) {
   sem_op.sem_flg = 0;
   semop(sem_id, &sem_op, 1);
 }
-
+//generer un temps aleatoire entre deux limites pour simuler le temps des secteurs
 float generate_random_time(float min_time, float max_time) {
   return min_time + ((float)rand() / RAND_MAX) * (max_time - min_time);
 }
-
+// simuler untour pour une voiture
 void simulate_lap(struct SharedMemory *shm, int car_index, int sem_id) {
-  sem_lock(sem_id);
+  sem_lock(sem_id);// verrouille la semaphore
 
   struct CarTime *car = &shm->cars[car_index];
 
-  if (car->out) {
+  if (car->out) {// si voiture out on sort
     sem_unlock(sem_id);
     return;
   }
@@ -163,7 +163,7 @@ const char *find_driver_name(int car_number) {
   }
   return "Unknown"; // Fallback for unmapped car numbers
 }
-
+//enregistres les resultats d'une session dans un fichier
 void save_session_results(struct SharedMemory *shm, const char *filename) {
   FILE *file = fopen(filename, "w");
   if (file == NULL) {
@@ -197,7 +197,7 @@ void save_session_results(struct SharedMemory *shm, const char *filename) {
 
   fclose(file);
 }
-
+//afficher les status actuels des voitures
 void print_current_standings(struct SharedMemory *shm) {
   printf("----------------------------------------------------------------------------------------------\n");
   printf("| Pos | Car # | Driver       | Best Lap  T  |  S.1    S.2    S.3  | Pit | Status |    Diff   |\n");
@@ -238,7 +238,7 @@ void print_current_standings(struct SharedMemory *shm) {
 
 
 #include "f1_championship.h"
-
+// afffiche le classement general du championnat
 void print_championship_standings(struct SharedMemory *shm) {
   printf("==============================================================\n");
   printf("|                   CHAMPIONSHIP STANDINGS                   |\n");
